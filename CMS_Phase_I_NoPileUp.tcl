@@ -465,7 +465,7 @@ module FastJetFinder GenJetFinder {
   set ConeRadius 0.5
   set SeedThreshold 1.0
   set ConeAreaFraction 1.0
-  set AdjacencyCut 2.0
+  set AdjacencyCut 2
   set OverlapThreshold 0.75
 
   set MaxIterations 100
@@ -492,7 +492,7 @@ module FastJetFinder FastJetFinder {
   set ConeRadius 0.5
   set SeedThreshold 1.0
   set ConeAreaFraction 1.0
-  set AdjacencyCut 2.0
+  set AdjacencyCut 2
   set OverlapThreshold 0.75
 
   set MaxIterations 100
