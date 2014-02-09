@@ -1,23 +1,24 @@
 #!/bin/bash
 
-cd MadGraphOutput
+
 
 for i in `seq 25`; do
-    cat > MadGraph.${i}.job <<EOF
+    cat > condor/MadGraph.${i}.job <<EOF
 universe = vanilla
 Executable = ${CMSSW_BASE}/src/DelphesTutorial/run/condor/MadGraph.sh
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
-Output = condor/MadGraph.${i}.out
-Error = condor/MadGraph..${i}.err
-Log = condor/MadGraph.${i}.log
+Output = ${CMSSW_BASE}/src/DelphesTutorial/run/condor/MadGraph.${i}.out
+Error = ${CMSSW_BASE}/src/DelphesTutorial/run/condor/MadGraph.${i}.err
+Log = ${CMSSW_BASE}/src/DelphesTutorial/run/condor/MadGraph.${i}.log
 Notification = Never
-Arguments = ${i} ${CMSSW_BASE}/src/MadGraph
+Arguments = ${i} ${CMSSW_BASE}/src/DelphesTutorial/MadGraph
 
 Queue 1
 EOF
     
-    condor_submit MadGraph.{i}.job
-
+    cd MadGraphOutput
+    condor_submit ../condor/MadGraph.${i}.job
+    cd -
 done
     
