@@ -1,0 +1,2 @@
+setenv DELPHES Delphes-3.0.12
+setenv LD_LIBRARY_PATH $PWD/../${DELPHES}/:$LD_LIBRARY_PATH
