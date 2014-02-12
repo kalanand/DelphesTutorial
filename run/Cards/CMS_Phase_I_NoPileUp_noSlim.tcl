@@ -614,9 +614,9 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
-  add Branch Calorimeter/eflowTracks EFlowTrack Track
-  add Branch Calorimeter/eflowTowers EFlowTower Tower
-  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
+  #add Branch Calorimeter/eflowTracks EFlowTrack Track
+  #add Branch Calorimeter/eflowTowers EFlowTower Tower
+  #add Branch MuonMomentumSmearing/muons EFlowMuon Muon
   add Branch GenJetFinder/jets GenJet Jet
   add Branch CAJetFinder/jets CAJet Jet
   add Branch UniqueObjectFinderMJ/jets Jet Jet
