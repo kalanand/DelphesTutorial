@@ -28,6 +28,8 @@ set ExecutionPath {
   JetPileUpSubtractor
   CAJetPileUpSubtractor
 
+  JetEnergyScale
+
   PhotonEfficiency
   PhotonIsolation
 
@@ -68,6 +70,13 @@ module PileUpMerger PileUpMerger {
   set MeanPileUp 140
   # spread in the beam direction in m (assumes gaussian)
   set ZVertexSpread 0.05
+
+  # maximum spread in time in s
+  set TVertexSpread 1.5E-09
+
+  # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
+  
+  set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
 }
 
 #################################
@@ -346,6 +355,9 @@ module FastJetFinder Rho {
   set GhostEtaMax 5.0
   set RhoEtaMax 5.0
 
+  add RhoEtaRange 0.0 2.5
+  add RhoEtaRange 2.5 5.0
+
   set JetPTMin 0.0
 }
 
@@ -445,6 +457,17 @@ module JetPileUpSubtractor CAJetPileUpSubtractor {
   set JetPTMin 20.0
 }
 
+##################
+# Jet Energy Scale
+##################
+
+module EnergyScale JetEnergyScale {
+  set InputArray JetPileUpSubtractor/jets
+  set OutputArray jets
+
+ # scale formula for jets
+  set ScaleFormula {1.0}
+}
 
 ###################
 # Photon efficiency
@@ -603,8 +626,7 @@ module Merger ScalarHT {
 
 module BTagging BTagging {
   set PartonInputArray Delphes/partons
-#  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
   set DeltaR 0.5
@@ -635,7 +657,8 @@ module BTagging BTagging {
 module BTagging BTaggingLoose {
   set PartonInputArray Delphes/partons
 #  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  #set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 1
   set DeltaR 0.5
@@ -667,8 +690,9 @@ module BTagging BTaggingLoose {
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
+  set JetInputArray JetEnergyScale/jets
 #  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  #set JetInputArray JetPileUpSubtractor/jets
 
   set DeltaR 0.5
 

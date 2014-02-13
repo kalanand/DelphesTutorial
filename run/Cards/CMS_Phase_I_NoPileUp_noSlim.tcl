@@ -32,6 +32,8 @@ set ExecutionPath {
   FastJetFinder
   CAJetFinder
 
+  JetEnergyScale
+
   UniqueObjectFinderGJ
   UniqueObjectFinderEJ
   UniqueObjectFinderMJ
@@ -500,6 +502,17 @@ module FastJetFinder CAJetFinder {
   set JetPTMin 200.0
 }
 
+##################
+# Jet Energy Scale
+##################
+
+module EnergyScale JetEnergyScale {
+  set InputArray FastJetFinder/jets
+  set OutputArray jets
+
+ # scale formula for jets
+  set ScaleFormula {1.0}
+}
 
 ###########
 # b-tagging
@@ -507,7 +520,7 @@ module FastJetFinder CAJetFinder {
 
 module BTagging BTagging {
   set PartonInputArray Delphes/partons
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
   set DeltaR 0.5
@@ -539,7 +552,7 @@ module BTagging BTagging {
 
 module BTagging BTaggingLoose {
   set PartonInputArray Delphes/partons
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 1
   set DeltaR 0.5
@@ -571,7 +584,7 @@ module BTagging BTaggingLoose {
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray JetEnergyScale/jets
 
   set DeltaR 0.5
 
@@ -593,7 +606,7 @@ module TauTagging TauTagging {
 
 module UniqueObjectFinder UniqueObjectFinderGJ {
    add InputArray PhotonIsolation/photons photons
-   add InputArray FastJetFinder/jets jets
+   add InputArray JetEnergyScale/jets jets
 }
 
 module UniqueObjectFinder UniqueObjectFinderEJ {
