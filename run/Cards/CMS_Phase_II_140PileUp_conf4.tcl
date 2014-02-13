@@ -6,7 +6,6 @@ set ExecutionPath {
 
   PileUpMerger
   ParticlePropagator
-  StatusPid
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -25,8 +24,12 @@ set ExecutionPath {
   FastJetFinder
   CAJetFinder
   GenJetFinder
+  PileUpJetID
+
   JetPileUpSubtractor
   CAJetPileUpSubtractor
+
+  JetEnergyScale
 
   PhotonEfficiency
   PhotonIsolation
@@ -68,6 +71,13 @@ module PileUpMerger PileUpMerger {
   set MeanPileUp 140
   # spread in the beam direction in m (assumes gaussian)
   set ZVertexSpread 0.05
+
+  # maximum spread in time in s
+  set TVertexSpread 1.5E-09
+
+  # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
+  
+  set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
 }
 
 #################################
@@ -90,21 +100,6 @@ module ParticlePropagator ParticlePropagator {
   # magnetic field
   set Bz 3.8
 }
-
-####################################
-# StatusPidFilter
-# This module removes all generated particles
-# except electrons, muons, taus, and status==3
-####################################
-
-module StatusPidFilter StatusPid {
-#    set InputArray Delphes/stableParticles
-    set InputArray Delphes/allParticles
-    set OutputArray filteredParticles
-
-    set PTMin 0.5
-}
-
 
 ####################################
 # Charged hadron tracking efficiency
@@ -249,7 +244,6 @@ module MomentumSmearing MuonMomentumSmearing {
                          (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0)                * (0.80)}
 }
 
-
 ##############
 # Track merger
 ##############
@@ -390,6 +384,9 @@ module FastJetFinder Rho {
   set GhostEtaMax 5.0
   set RhoEtaMax 5.0
 
+  add RhoEtaRange 0.0 4.0
+  add RhoEtaRange 4.0 5.0
+
   set JetPTMin 0.0
 }
 
@@ -446,6 +443,29 @@ module FastJetFinder CAJetFinder {
   set JetPTMin 200.0
 }
 
+
+###########################
+# Jet Pile-Up ID
+###########################
+
+module PileUpJetID PileUpJetID {
+  set JetInputArray FastJetFinder/jets
+  set TrackInputArray Calorimeter/eflowTracks
+  set NeutralInputArray Calorimeter/eflowTowers
+
+  set VertexInputArray PileUpMerger/vertices
+  # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution                                                                                                                           
+  # Z vertex resolution in m                                                                                                                                                                              
+  set ZVertexResolution 0.0001
+
+  set OutputArray jets
+
+  set UseConstituents 0
+  set ParameterR 0.5
+
+  set JetPTMin 20.0
+}
+
 ####################
 # Constituent filter
 ####################
@@ -471,7 +491,7 @@ module FastJetFinder CAJetFinder {
 ###########################
 
 module JetPileUpSubtractor JetPileUpSubtractor {
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray PileUpJetID/jets
   set RhoInputArray Rho/rho
 
   set OutputArray jets
@@ -486,6 +506,17 @@ module JetPileUpSubtractor CAJetPileUpSubtractor {
   set JetPTMin 20.0
 }
 
+##################
+# Jet Energy Scale
+##################
+
+module EnergyScale JetEnergyScale {
+  set InputArray JetPileUpSubtractor/jets
+  set OutputArray jets
+
+ # scale formula for jets
+  set ScaleFormula {1.0}
+}
 
 ###################
 # Photon efficiency
@@ -647,7 +678,8 @@ module Merger ScalarHT {
 module BTagging BTagging {
   set PartonInputArray Delphes/partons
 #  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  #set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
   set DeltaR 0.5
@@ -678,7 +710,8 @@ module BTagging BTagging {
 module BTagging BTaggingLoose {
   set PartonInputArray Delphes/partons
 #  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
+  #set JetInputArray JetPileUpSubtractor/jets
 
   set BitNumber 1
   set DeltaR 0.5
@@ -713,7 +746,8 @@ module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
 #  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  #set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set DeltaR 0.5
 
@@ -763,8 +797,8 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-#  add Branch Delphes/allParticles Particle GenParticle
-  add Branch StatusPid/filteredParticles Particle GenParticle
+  add Branch Delphes/allParticles Particle GenParticle
+  #add Branch StatusPid/filteredParticles Particle GenParticle
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
 #  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
