@@ -43,6 +43,7 @@ set ExecutionPath {
   TauTagging
 
   ScalarHT
+  MHTCalc
 
   TreeWriter
 }
@@ -432,6 +433,25 @@ module Merger ScalarHT {
   add InputArray UniqueObjectFinderMJ/muons
   set EnergyOutputArray energy
 }
+
+##################
+# MHT
+##################
+
+module MHT MHTCalc {
+    set JetInputArray UniqueObjectFinderMJ/jets
+    set ElectronInputArray UniqueObjectFinderEJ/electrons
+    set MuonInputArray UniqueObjectFinderGJ/photons
+    set PhotonInputArray UniqueObjectFinderMJ/muons
+
+    set MomentumOutputArray MHT
+
+    set JetEffFormula {pt>30}
+    set ElectronEffFormula {pt>30}
+    set MuonEffFormula {pt>30}
+    set PhotonEffFormula {pt>30}
+}
+
 
 #####################
 # MC truth jet finder
