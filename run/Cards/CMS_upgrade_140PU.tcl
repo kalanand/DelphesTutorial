@@ -6,7 +6,6 @@ set ExecutionPath {
 
   PileUpMerger
   ParticlePropagator
-  StatusPid
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -25,8 +24,11 @@ set ExecutionPath {
   FastJetFinder
   CAJetFinder
   GenJetFinder
+  PileUpJetID
   JetPileUpSubtractor
   CAJetPileUpSubtractor
+
+  JetEnergyScale
 
   PhotonEfficiency
   PhotonIsolation
@@ -48,6 +50,7 @@ set ExecutionPath {
   UniqueObjectFinderMJ
 
   ScalarHT
+  MHTCalc
 
   TreeWriter
 }
@@ -68,6 +71,13 @@ module PileUpMerger PileUpMerger {
   set MeanPileUp 140
   # spread in the beam direction in m (assumes gaussian)
   set ZVertexSpread 0.05
+
+  # maximum spread in time in s
+  set TVertexSpread 1.5E-09
+
+  # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
+  
+  set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
 }
 
 #################################
@@ -90,21 +100,6 @@ module ParticlePropagator ParticlePropagator {
   # magnetic field
   set Bz 3.8
 }
-
-####################################
-# StatusPidFilter
-# This module removes all generated particles
-# except electrons, muons, taus, and status==3
-####################################
-
-module StatusPidFilter StatusPid {
-#    set InputArray Delphes/stableParticles
-    set InputArray Delphes/allParticles
-    set OutputArray filteredParticles
-
-    set PTMin 0.5
-}
-
 
 ####################################
 # Charged hadron tracking efficiency
@@ -159,9 +154,9 @@ module Efficiency MuonTrackingEfficiency {
   set EfficiencyFormula {                                                    (pt <= 0.1)   * (0.00) + \
                                            (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.998) + \
                                            (abs(eta) <= 1.5) * (pt > 1.0)                  * (0.9998) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.98) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0)                  * (0.98) + \
-                         (abs(eta) > 2.5)                                                  * (0.00)}
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.98) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0)                  * (0.98) + \
+                         (abs(eta) > 4.0)                                                  * (0.00)}
 }
 
 ########################################
@@ -217,10 +212,10 @@ module MomentumSmearing MuonMomentumSmearing {
                                            (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.012) + \
                                            (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.015) + \
                                            (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.03) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.025) + \
-						 (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.03)}
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0e1 && pt <= 2.0e2) * (0.025) + \
+						 (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 2.0e2)                * (0.03)}
 }
 
 ##############
@@ -361,6 +356,9 @@ module FastJetFinder Rho {
   set GhostEtaMax 5.0
   set RhoEtaMax 5.0
 
+  add RhoEtaRange 0.0 4.0
+  add RhoEtaRange 4.0 5.0
+
   set JetPTMin 0.0
 }
 
@@ -417,24 +415,27 @@ module FastJetFinder CAJetFinder {
   set JetPTMin 200.0
 }
 
-####################
-# Constituent filter
-####################
+###########################
+# Jet Pile-Up ID
+###########################
 
-# module ConstituentFilter ConstituentFilter {
+module PileUpJetID PileUpJetID {
+  set JetInputArray FastJetFinder/jets
+  set TrackInputArray Calorimeter/eflowTracks
+  set NeutralInputArray Calorimeter/eflowTowers
 
-# # add JetInputArray InputArray
-#   add JetInputArray GenJetFinder/jets
-#   add JetInputArray CAJetFinder/jets
+  set VertexInputArray PileUpMerger/vertices
+  # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution                                                                                                                           
+  # Z vertex resolution in m                                                                                                                                                                              
+  set ZVertexResolution 0.0001
 
-  
-# # add ConstituentInputArray InputArray OutputArray
-#   add ConstituentInputArray Delphes/stableParticles stableParticles
-#   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
-#   add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
-#   add ConstituentInputArray MuonMomentumSmearing/muons muons
-# }
+  set OutputArray jets
 
+  set UseConstituents 0
+  set ParameterR 0.5
+
+  set JetPTMin 20.0
+}
 
 
 ###########################
@@ -442,7 +443,7 @@ module FastJetFinder CAJetFinder {
 ###########################
 
 module JetPileUpSubtractor JetPileUpSubtractor {
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray PileUpJetID/jets
   set RhoInputArray Rho/rho
 
   set OutputArray jets
@@ -457,6 +458,17 @@ module JetPileUpSubtractor CAJetPileUpSubtractor {
   set JetPTMin 20.0
 }
 
+##################
+# Jet Energy Scale
+##################
+
+module EnergyScale JetEnergyScale {
+  set InputArray JetPileUpSubtractor/jets
+  set OutputArray jets
+
+ # scale formula for jets
+  set ScaleFormula {1.0}
+}
 
 ###################
 # Photon efficiency
@@ -559,13 +571,13 @@ module Efficiency MuonEfficiency {
 
   # efficiency formula for muons
     set EfficiencyFormula {                                    (pt <= 2.0)  * (0.00) + \  
-                         (abs(eta) <= 2.40) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
-                         (abs(eta) <= 2.40) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \ 
-                         (abs(eta) <= 2.40) * (pt >  4.0 && pt <= 11.0) * (0.93) + \               
-                         (abs(eta) <= 2.40) * (pt >  11. && pt <= 50.)  * (0.96) + \   
-                         (abs(eta) <= 2.40) * (pt >  50. && pt <= 70.)  * (0.98) + \                      
-                         (abs(eta) <= 2.40) * (pt > 70.0 )  * (1.00) + \   
-	(abs(eta) > 2.40)  * (0.00)}
+                         (abs(eta) <= 4.0) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
+                         (abs(eta) <= 4.0) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \ 
+                         (abs(eta) <= 4.0) * (pt >  4.0 && pt <= 11.0) * (0.93) + \               
+                         (abs(eta) <= 4.0) * (pt >  11. && pt <= 50.)  * (0.96) + \   
+                         (abs(eta) <= 4.0) * (pt >  50. && pt <= 70.)  * (0.98) + \                      
+                         (abs(eta) <= 4.0) * (pt > 70.0 )  * (1.00) + \   
+	(abs(eta) > 4.0)  * (0.00)}
 }
 
 ################
@@ -608,6 +620,24 @@ module Merger ScalarHT {
   set EnergyOutputArray energy
 }
 
+##################
+# MHT
+##################
+
+module MHT MHTCalc {
+    set JetInputArray UniqueObjectFinderMJ/jets
+    set ElectronInputArray UniqueObjectFinderEJ/electrons
+    set MuonInputArray UniqueObjectFinderGJ/photons
+    set PhotonInputArray UniqueObjectFinderMJ/muons
+
+    set MomentumOutputArray MHT
+
+    set JetEffFormula {pt>30}
+    set ElectronEffFormula {pt>30}
+    set MuonEffFormula {pt>30}
+    set PhotonEffFormula {pt>30}
+}
+
 
 ###########
 # b-tagging
@@ -615,8 +645,7 @@ module Merger ScalarHT {
 
 module BTagging BTagging {
   set PartonInputArray Delphes/partons
-#  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
   set DeltaR 0.5
@@ -647,7 +676,8 @@ module BTagging BTagging {
 module BTagging BTaggingLoose {
   set PartonInputArray Delphes/partons
 #  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  #set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 1
   set DeltaR 0.5
@@ -679,8 +709,9 @@ module BTagging BTaggingLoose {
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
+  set JetInputArray JetEnergyScale/jets
 #  set JetInputArray FastJetFinder/jets
-  set JetInputArray JetPileUpSubtractor/jets
+  #set JetInputArray JetPileUpSubtractor/jets
 
   set DeltaR 0.5
 
@@ -730,21 +761,18 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-#  add Branch Delphes/allParticles Particle GenParticle
-  add Branch StatusPid/filteredParticles Particle GenParticle
-#  add Branch TrackMerger/tracks Track Track
-#  add Branch Calorimeter/towers Tower Tower
-#  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
-#  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
-#  add Branch ConstituentFilter/muons EFlowMuon Muon
+  add Branch Delphes/allParticles Particle GenParticle
+  #add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track
+  #add Branch Calorimeter/eflowTowers EFlowTower Tower 
+  #add Branch MuonMomentumSmearing/muons EFlowMuon Muon 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch CAJetPileUpSubtractor/jets CAJet Jet
   add Branch UniqueObjectFinderMJ/jets Jet Jet
   add Branch UniqueObjectFinderEJ/electrons Electron Electron
   add Branch UniqueObjectFinderGJ/photons Photon Photon
   add Branch UniqueObjectFinderMJ/muons Muon Muon
-#  add Branch MuonIsolation/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
+  add Branch MHTCalc/MHT MHT MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho ScalarHT
 }
