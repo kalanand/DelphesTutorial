@@ -1,13 +1,8 @@
 
 /** \class MHT
  *
- *  Selects candidates from the InputArray according to the efficiency formula.
  *
- *  $Date: 2013-02-12 14:57:44 +0100 (Tue, 12 Feb 2013) $
- *  $Revision: 905 $
- *
- *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author John Stupak
  *
  */
 
@@ -60,9 +55,8 @@ MHT::~MHT()
 
 void MHT::Init()
 {
-  fJetInputArray = ImportArray(GetString("JetInputArray", "UniqueObjectFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
-
+  //Get input array names from the config file
+  //The arguments to GetString are the name of the parameter whose value we want, and a default value in case the parameter is not present in the config file
   fElectronInputArray = ImportArray(GetString("ElectronInputArray", "UniqueObjectFinder/electrons"));
   fItElectronInputArray = fElectronInputArray->MakeIterator();
 
@@ -72,13 +66,21 @@ void MHT::Init()
   fPhotonInputArray = ImportArray(GetString("PhotonInputArray", "UniqueObjectFinder/photons"));
   fItPhotonInputArray = fPhotonInputArray->MakeIterator();
 
-  // create output array
-  fMomentumOutputArray = ExportArray(GetString("MomentumOutputArray", "momentum"));
+  //JETS
 
-  fJetEffFormula->Compile(GetString("JetEffFormula", "pt>30"));
+  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+  //Get efficiency formulas from the config file
   fElectronEffFormula->Compile(GetString("ElectronEffFormula", "pt>30"));
   fMuonEffFormula->Compile(GetString("MuonEffFormula", "pt>30"));
   fPhotonEffFormula->Compile(GetString("PhotonEffFormula", "pt>30"));
+  //JETS
+
+  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+  //Create output array
+  //fMomentumOutputArray = ExportArray(GetString("MomentumOutputArray", "momentum"));
+
 }
 
 //------------------------------------------------------------------------------
@@ -91,42 +93,28 @@ void MHT::Finish()
 
 void MHT::Process()
 {
-  Candidate *candidate;
-  TLorentzVector momentum;
-  TLorentzVector candidatePosition, candidateMomentum;
+  Candidate *candidate;   //Used in loops over electrons, muons, photons, and jets
+  TLorentzVector candidateMomentum;   //Used in loops over electron, muons, photons, and jets to store 4-momenta of candidate
+  TLorentzVector momentum;   //This will be used as running sum of all candidate's 4-momenta, from which the output will be derived
 
   vector< TIterator * >::iterator itInputList;
   TIterator *iterator;
 
   DelphesFactory *factory = GetFactory();
 
+  //Initialize the total 4-momentum to 0
   momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-
-  // loop over all input jets
-  fItJetInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItJetInputArray->Next())))
-    {
-      candidatePosition = candidate->Position;
-      candidateMomentum = candidate->Momentum;
-
-      // apply an efficency formula
-      if(gRandom->Uniform() <= fJetEffFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
-      	{
-	  momentum+=candidateMomentum;
-	}
-    }
 
   // loop over all input electrons
   fItElectronInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItElectronInputArray->Next())))
     {
-      candidatePosition = candidate->Position;
-      candidateMomentum = candidate->Momentum;
+      candidateMomentum = candidate->Momentum;   //Get electron 4-momentum
 
       // apply an efficency formula
       if(gRandom->Uniform() <= fElectronEffFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
         {
-          momentum+=candidateMomentum;
+          momentum+=candidateMomentum;   //Add electron 4-momentum to running total
 	}
     }
 
@@ -134,13 +122,12 @@ void MHT::Process()
   fItMuonInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItMuonInputArray->Next())))
     {
-      candidatePosition = candidate->Position;
-      candidateMomentum = candidate->Momentum;
+      candidateMomentum = candidate->Momentum;   //Get muon 4-momentum
 
       // apply an efficency formula      
       if(gRandom->Uniform() <= fMuonEffFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
         {
-          momentum+=candidateMomentum;
+          momentum+=candidateMomentum;//Add muon 4-momentum to running total
 	}
     }
 
@@ -148,22 +135,26 @@ void MHT::Process()
   fItPhotonInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItPhotonInputArray->Next())))
     {
-      candidatePosition = candidate->Position;
-      candidateMomentum = candidate->Momentum;
+      candidateMomentum = candidate->Momentum;   //Get photon 4-momentum
 
       // apply an efficency formula
       if(gRandom->Uniform() <= fPhotonEffFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
         {
-          momentum+=candidateMomentum;
+          momentum+=candidateMomentum;   //Add photon 4-momentum to running total
 	}
     }
 
+  //JETS
+
+  //Candidate used to output MHT
   candidate = factory->NewCandidate();
 
+  //Set 4-momentum of output candidate
   candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   candidate->Momentum = momentum;
 
-  fMomentumOutputArray->Add(candidate);
+  //Output must be in the form of an array - Here the array will always contain exactly 1 element
+  //fMomentumOutputArray->Add(candidate);
 }
 
 //------------------------------------------------------------------------------
