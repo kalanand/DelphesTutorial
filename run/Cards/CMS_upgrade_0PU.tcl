@@ -43,6 +43,7 @@ set ExecutionPath {
   TauTagging
 
   ScalarHT
+  MHTCalc
 
   TreeWriter
 }
@@ -445,10 +446,10 @@ module MHT MHTCalc {
 
     set MomentumOutputArray MHT
 
-    set ElectronEffFormula {pt>30}
-    set MuonEffFormula {pt>30}
-    set PhotonEffFormula {pt>30}
-    #JETS
+    set JetSelectionFormula {pt>30}
+    set ElectronSelectionFormula {pt>30}
+    set MuonSelectionFormula {pt>30}
+    set PhotonSelectionFormula {pt>30}
 }
 
 
