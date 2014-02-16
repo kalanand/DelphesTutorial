@@ -37,12 +37,12 @@ MHT::MHT() :
   fJetInputArray(0),fItJetInputArray(0),fElectronInputArray(0),fItElectronInputArray(0),
   fMuonInputArray(0),fItMuonInputArray(0),fPhotonInputArray(0),fItPhotonInputArray(0),
   fMomentumOutputArray(0),
-  fJetEffFormula(0),fElectronEffFormula(0),fMuonEffFormula(0),fPhotonEffFormula(0)
+  fJetSelectionFormula(0),fElectronSelectionFormula(0),fMuonSelectionFormula(0),fPhotonSelectionFormula(0)
 {
-  fJetEffFormula = new DelphesFormula;
-  fElectronEffFormula = new DelphesFormula;
-  fMuonEffFormula = new DelphesFormula;
-  fPhotonEffFormula = new DelphesFormula;
+  fJetSelectionFormula = new DelphesFormula;
+  fElectronSelectionFormula = new DelphesFormula;
+  fMuonSelectionFormula = new DelphesFormula;
+  fPhotonSelectionFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -71,9 +71,9 @@ void MHT::Init()
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
   //Get efficiency formulas from the config file
-  fElectronEffFormula->Compile(GetString("ElectronEffFormula", "pt>30"));
-  fMuonEffFormula->Compile(GetString("MuonEffFormula", "pt>30"));
-  fPhotonEffFormula->Compile(GetString("PhotonEffFormula", "pt>30"));
+  fElectronSelectionFormula->Compile(GetString("ElectronSelectionFormula", "pt>30"));
+  fMuonSelectionFormula->Compile(GetString("MuonSelectionFormula", "pt>30"));
+  fPhotonSelectionFormula->Compile(GetString("PhotonSelectionFormula", "pt>30"));
   //JETS
 
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -112,7 +112,7 @@ void MHT::Process()
       candidateMomentum = candidate->Momentum;   //Get electron 4-momentum
 
       // apply an efficency formula
-      if(gRandom->Uniform() <= fElectronEffFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
+      if(gRandom->Uniform() <= fElectronSelectionFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
         {
           momentum+=candidateMomentum;   //Add electron 4-momentum to running total
 	}
@@ -125,7 +125,7 @@ void MHT::Process()
       candidateMomentum = candidate->Momentum;   //Get muon 4-momentum
 
       // apply an efficency formula      
-      if(gRandom->Uniform() <= fMuonEffFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
+      if(gRandom->Uniform() <= fMuonSelectionFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
         {
           momentum+=candidateMomentum;//Add muon 4-momentum to running total
 	}
@@ -138,7 +138,7 @@ void MHT::Process()
       candidateMomentum = candidate->Momentum;   //Get photon 4-momentum
 
       // apply an efficency formula
-      if(gRandom->Uniform() <= fPhotonEffFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
+      if(gRandom->Uniform() <= fPhotonSelectionFormula->Eval(candidateMomentum.Pt(), candidateMomentum.Eta()))
         {
           momentum+=candidateMomentum;   //Add photon 4-momentum to running total
 	}

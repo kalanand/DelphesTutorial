@@ -36,7 +36,7 @@ private:
   const TObjArray *fJetInputArray,*fElectronInputArray,*fMuonInputArray,*fPhotonInputArray; //!  
   TIterator *fItJetInputArray,*fItElectronInputArray,*fItMuonInputArray,*fItPhotonInputArray; //!
   TObjArray *fMomentumOutputArray; //!
-  DelphesFormula *fJetEffFormula,*fElectronEffFormula,*fMuonEffFormula,*fPhotonEffFormula; //!
+  DelphesFormula *fJetSelectionFormula,*fElectronSelectionFormula,*fMuonSelectionFormula,*fPhotonSelectionFormula; //!
 
   ClassDef(MHT, 1)
 };
