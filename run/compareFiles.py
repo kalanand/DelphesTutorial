@@ -1,5 +1,6 @@
 from ROOT import *
 from sys import argv
+import os
 
 NORM=False
 LOG=False
@@ -12,6 +13,8 @@ except:
     print "No files specified"
     exit()
 
+if not os.path.exists("plots"): os.mkdir("plots")
+
 files=[]
 for fileName in fileNames:
     files.append(TFile(fileName))
@@ -20,6 +23,8 @@ keys=files[0].GetListOfKeys()
 
 c=TCanvas()
 for key in keys:
+    if type(files[0].Get(key.GetName()))!=type(TH1F()): continue
+
     l=TLegend(.49,.69,.89,.89)
     hists=[]
     max=0
