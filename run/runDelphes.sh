@@ -6,6 +6,14 @@ if [[ "$#" -ne 1 ]]; then
 fi
 
 card=${1}
+outputDir=${card%.tcl}
+outputDir=${outputDir#*/}
+
+if [[ ! -d $outputDir ]]; then
+    mkdir $outputDir
+else
+    rm $outputDir/*
+fi
 
 for i in `seq 25`; do
     cat > condor/Delphes.${i}.job <<EOF
@@ -22,7 +30,7 @@ Arguments = ${i} ${CMSSW_BASE}/src/DelphesTutorial/Delphes-3.0.12 ${PWD}/${card}
 Queue 1
 EOF
     
-    cd DelphesOutput
+    cd $outputDir
     condor_submit ../condor/Delphes.${i}.job
     cd -
 done
