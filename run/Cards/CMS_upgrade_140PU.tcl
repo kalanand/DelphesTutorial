@@ -50,7 +50,6 @@ set ExecutionPath {
   UniqueObjectFinderMJ
 
   ScalarHT
-  MHTCalc
 
   TreeWriter
 }
@@ -632,10 +631,10 @@ module MHT MHTCalc {
 
     set MomentumOutputArray MHT
 
-    set JetEffFormula {pt>30}
     set ElectronEffFormula {pt>30}
     set MuonEffFormula {pt>30}
     set PhotonEffFormula {pt>30}
+    #JETS
 }
 
 
@@ -772,7 +771,7 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinderGJ/photons Photon Photon
   add Branch UniqueObjectFinderMJ/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
-  add Branch MHTCalc/MHT MHT MissingET
+  #add Branch MHTCalc/MHT MHT MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho ScalarHT
 }
