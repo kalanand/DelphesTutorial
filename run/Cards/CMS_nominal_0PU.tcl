@@ -438,11 +438,11 @@ module Merger ScalarHT {
 ##################
 
 module MHT MHTCalc {
-    set JetInputArray UniqueObjectFinderMJ/jets
     set ElectronInputArray UniqueObjectFinderEJ/electrons
     set MuonInputArray UniqueObjectFinderGJ/photons
     set PhotonInputArray UniqueObjectFinderMJ/muons
-
+    #JETS
+    
     set MomentumOutputArray MHT
 
     set ElectronSelectionFormula {pt>30}
