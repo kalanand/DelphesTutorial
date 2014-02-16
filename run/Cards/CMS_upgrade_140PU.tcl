@@ -114,9 +114,9 @@ module Efficiency ChargedHadronTrackingEfficiency {
   set EfficiencyFormula {                                                    (pt <= 0.1)   * (0.00) + \
                                            (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.85) + \
                                            (abs(eta) <= 1.5) * (pt > 1.0)                  * (0.97) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.85) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0)                  * (0.90) + \
-                         (abs(eta) > 2.5)                                                  * (0.00)}
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.85) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0)                  * (0.90) + \
+                         (abs(eta) > 4.0)                                                  * (0.00)}
 }
 
 ##############################
@@ -133,10 +133,10 @@ module Efficiency ElectronTrackingEfficiency {
                                            (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.85) + \
                                            (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e2) * (0.97) + \
                                            (abs(eta) <= 1.5) * (pt > 1.0e2)                * (0.99) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.85) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e2) * (0.90) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2)                * (0.95) + \
-                         (abs(eta) > 2.5)                                                  * (0.00)}
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.85) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 1.0e2) * (0.90) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0e2)                * (0.95) + \
+                         (abs(eta) > 4.0)                                                  * (0.00)}
 }
 
 ##########################
@@ -173,10 +173,10 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
                                            (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.013) + \
                                            (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.02) + \
                                            (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05)}
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 2.0e2)                * (0.05)}
 }
 
 #################################
@@ -532,12 +532,12 @@ module Efficiency ElectronEfficiency {
                          (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 30.0 && pt <= 50.0)  * (0.95) + \                          
                          (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 50.0 && pt <= 70.0)  * (0.95) + \          
                          (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 70.0 )  * (1.0) + \   
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt >  4.0 && pt <= 10.0)  * (0.65) + \
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 10.0 && pt <= 30.0)  * (0.75) + \                                                      
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 30.0 && pt <= 50.0)  * (0.85) + \                          
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 50.0 && pt <= 70.0)  * (0.85) + \          
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 70.0 )  * (0.85) + \                                                                                                              
-	(abs(eta) > 2.5)                              * (0.00)}
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt >  4.0 && pt <= 10.0)  * (0.65) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0)  * (0.75) + \                                                      
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0)  * (0.85) + \                          
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0)  * (0.85) + \          
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 70.0 )  * (0.85) + \                                                                                                              
+	(abs(eta) > 4.0)                              * (0.00)}
 }
 
 ####################
