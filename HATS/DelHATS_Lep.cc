@@ -2,15 +2,15 @@
 // 
 //       Filename:  DelHATS.cc
 // 
-//    Description:  
+//    Description:  An example code for Delphes exercise for lepton efficiency
+//    comparison between PhaseI and PhaseII 0PU samples
 // 
 //        Version:  1.0
 //        Created:  02/11/2014 01:44:39 PM
 //       Compiler:  g++ -std=c++11
 // 
-//         Author:  Zhenbin Wu (benwu)
-//          Email:  benwu@fnal.gov
-//        Company:  Baylor University, CDF@FNAL, CMS@LPC
+//         Author:  Zhenbin Wu, John Stupak
+//        Company:  HATS@LPC
 // 
 // ===========================================================================
 
@@ -51,35 +51,70 @@ int main ( int argc, char *argv[] )
   }
 
   // Getting the input filename
-  const std::string inputFile  = argv[1];
-  const std::string outputFile_name  = argv[2];
+  const std::string inputFile_name  = argv[1];
+  const std::string outputFile_name = argv[2];
 
   // Create chain of root trees
   TChain chain("Delphes");
-  chain.Add(inputFile.c_str());
+  chain.Add(inputFile_name.c_str());
 
   // Create the output file
   TFile outputfile(outputFile_name.c_str(), "RECREATE");
 
-  // Keep the root window open
-  TApplication *app = new TApplication("DelHATS", &argc, argv);
-  
   // Create object of class ExRootTreeReader
   ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
   Long64_t numberOfEntries = treeReader->GetEntries();
   
   // Get pointers to branches used in this analysis
-  TClonesArray *branchJet = treeReader->UseBranch("Jet");
-  TClonesArray *branchElectron = treeReader->UseBranch("Electron");
-  TClonesArray *branchGenParticles = treeReader->UseBranch("Particle");
+  TClonesArray *branchJet        = treeReader->UseBranch("Jet");
+  TClonesArray *branchGenJet     = treeReader->UseBranch("GenJet");
+  TClonesArray *branchElectron   = treeReader->UseBranch("Electron");
+  TClonesArray *branchMuon       = treeReader->UseBranch("Muon");
+  TClonesArray *branchPhoton     = treeReader->UseBranch("Photon");
+  TClonesArray *branchMet        = treeReader->UseBranch("MissingET");
+  TClonesArray *branchParticle   = treeReader->UseBranch("Particle");
   
   // Book histograms
-  TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 100, 0.0, 100.0);
-  TH1 *histMass = new TH1F("mass", "M_{inv}(e_{1}, e_{2})", 100, 40.0, 140.0);
+//----------------------------------------------------------------------------
+//  Example 
+//---------------------------------------------------------------------------
+  TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 500, 0.0, 1000);
 
-  // Book histograms for Lepton Efficiency
-  TH1 *histGenLepEta = new TH1F("GenParticle_Eta", "GenP Eta", 120, -6, 6);
-  TH1 *histMatchGenLepEta = new TH1F("MatchGenParticle_Eta", "MatchGenP Eta", 120, -6, 6);
+//----------------------------------------------------------------------------
+//  Lepton Efficiency exercise
+//----------------------------------------------------------------------------
+  TH1 *histGenLepEta      = new TH1F("histGenLepEta ", "GenLepton Eta", 120, -6, 6);
+  TH1 *histMatchGenLepEta = new TH1F("histMatchGenLepEta", "Matched GenLepton Eta", 120, -6, 6);
+  TH1 *histLepEffEta      = new TH1F("histLepEffEta", "Lepton Efficiency", 120, -6, 6);
+
+
+//----------------------------------------------------------------------------
+//  JEtMET execise
+//----------------------------------------------------------------------------
+  //TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 500, 0.0, 1000);
+  //TH1 *histJetEta = new TH1F("jet_eta", "jet Eta", 120, -6, 6);
+
+  ////  MET and MET resolution
+  //TH1 *histMET = new TH1F("MET", "MET", 100, 0.0, 1000);
+  //TH1 *histMET_X = new TH1F("MET_X", "MET_X", 300, -300.0, 300.0);
+  //TH1 *histMET_Y = new TH1F("MET_Y", "MET_Y", 300, -300.0, 300.0);
+
+  //// MHT and MHT resolution
+  //TH1 *histMHT = new TH1F("MHT", "MHT", 100, 0.0, 1000);
+  //TH1 *histMHT_X = new TH1F("MHT_X", "MHT_X", 300, -300.0, 300.0);
+  //TH1 *histMHT_Y = new TH1F("MHT_Y", "MHT_Y", 300, -300.0, 300.0);
+
+  //// Jet response: approximate by TProfile
+  //TProfile *histJetResPT = new TProfile("histJetResPT ", 
+      //"Jet response as a fucntion of GenJet Pt", 100, 0, 500);
+  //TProfile *histJetResEta = new TProfile("histJetResEta ", 
+      //"Jet response as a function of GenJet Eta", 100, -5, 5);
+
+  //// Jet resolution for Eta (0, 2.5, 4, 5) and Pt (30, 50);
+  //TH1 *histJetEta1 = new TH1F("histJetEta1 ", "Jet Resolution with eta (0, 2.5)", 200, 4, 4);
+  //TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4)", 200, 4, 4);
+  //TH1 *histJetEta3 = new TH1F("histJetEta3 ", "Jet Resolution with eta (4, 5)", 200, 4, 4);
+
 //----------------------------------------------------------------------------
 //   Loop over all events
 //----------------------------------------------------------------------------
@@ -98,32 +133,20 @@ int main ( int argc, char *argv[] )
       histJetPT->Fill(jet->PT);
       
       // Print jet transverse momentum
-      std::cout << jet->PT << std::endl;
+      //std::cout << jet->PT << std::endl;
     }
 
-    Electron *elec1, *elec2;
-
-    // If event contains at least 2 electrons
-    if(branchElectron->GetEntries() > 1)
-    {
-      // Take first two electrons
-      elec1 = (Electron *) branchElectron->At(0);
-      elec2 = (Electron *) branchElectron->At(1);
-
-      // Plot their invariant mass
-      histMass->Fill(((elec1->P4()) + (elec2->P4())).M());
-    }
-
+    if (entry % 500 == 0)
+      std::cout << "--------------------" << entry << std::endl;
 //----------------------------------------------------------------------------
-//  
+//  Lepton Efficiency Exercise
 //----------------------------------------------------------------------------
-    std::map<int, int> MatchIdx = MatchingLepton<Electron>(branchGenParticles, branchElectron, 11);
+    std::map<int, int> MatchIdx = MatchingLepton<Electron>(branchParticle, branchElectron, 11);
     
-    std::cout << MatchIdx.size() << std::endl;
     for(std::map<int, int>::iterator it=MatchIdx.begin();
       it!=MatchIdx.end(); it++)
     {
-      GenParticle *gen = (GenParticle*) branchGenParticles->At(it->first);
+      GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
       histGenLepEta->Fill(gen->Eta);
       if (it->second != -1)
       {
@@ -133,21 +156,37 @@ int main ( int argc, char *argv[] )
 
   } // End of looping events
 
-  // Show resulting histograms
-  histJetPT->Draw();
-  histMass->Draw();
+  histLepEffEta = (TH1*)histMatchGenLepEta->Clone("histLepEffEta");
+  histLepEffEta->SetTitle("Lepton Efficiency");
+  histLepEffEta->Divide(histGenLepEta);
+
+  // Saving resulting histograms
+  histJetPT->Write();
   histGenLepEta->Write();
   histMatchGenLepEta->Write();
+  histLepEffEta->Write();
+  //histJetEta->Write();
+  //histMET->Write();
+  //histMET_X->Write();
+  //histMET_Y->Write();
+  //histMHT->Write();
+  //histMHT_X->Write();
+  //histMHT_Y->Write();
+  //histJetResPT->Write();
+  //histJetResEta->Write();
+  //histJetEta1->Write();
+  //histJetEta2->Write();
+  //histJetEta3->Write();
 
   outputfile.Close();
-  app->Run();
-
   return EXIT_SUCCESS;
 }				// ----------  end of function main  ----------
 
 // ===  FUNCTION  ============================================================
 //         Name:  MatchingLepton
-//  Description:  
+//  Description:  A template fucntion for matching reco lepton with the
+//  GenParticles specified by the PID (ele 11, muon 13, tau 15). Return a
+//  mapping of the index of GenParticle to reco lepton
 // ===========================================================================
   template <class T>
 std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *branchLep, int PID)
@@ -158,28 +197,31 @@ std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *br
 //----------------------------------------------------------------------------
 //  Getting the Gen Lepton
 //----------------------------------------------------------------------------
-  int GenSize = branchGenP->GetEntries(); 
+  int GenSize = branchParticle->GetEntries(); 
   for (int i = 0; i < GenSize; ++i)
   {
-    GenParticle *p = (GenParticle*) branchGenP->At(i);
-    if (p->Status != 3 || p->M1 > GenSize || p->M2 > GenSize )  continue;
-    if (std::fabs(p->PID) == PID) //Electron 
+    GenParticle *p = (GenParticle*) branchParticle->At(i);
+    if (p->Status != 3 ) // Skipping stable lepton, which might come from showing
+      continue;
+    if ( (p->M1 != -1 && fabs(((GenParticle*)branchParticle->At(p->M1))->PID) != 24) && 
+        (p->M2 != -1 && fabs(((GenParticle*)branchParticle->At(p->M2))->PID) != 24 ))
+        continue;  //Making sure the lepton from W decay 
+    if (std::fabs(p->PID) == PID) //Matched to the wanted lepton
     {
       MatchIdx[i] = -1;
     }
   }
 
 //----------------------------------------------------------------------------
-//  Getting the matched lepton
+//  Getting the matched lepton, simply take deltaR < 0.3 as matched
 //----------------------------------------------------------------------------
-
   for (int i = 0; i < branchLep->GetEntries(); ++i)
   {
     T *lep = (T*)branchLep->At(i);
     for(std::map<int, int>::iterator it=MatchIdx.begin();
       it!=MatchIdx.end(); it++)
     {
-      GenParticle *p = (GenParticle*) branchGenP->At(it->first);
+      GenParticle *p = (GenParticle*) branchParticle->At(it->first);
       if (p->P4().DeltaR(lep->P4())<0.3)
       {
         it->second = i;
