@@ -2,15 +2,19 @@
 // 
 //       Filename:  DelHATS.cc
 // 
-//    Description:  
+//    Description:  An example code for Delphes exercise of JetMET performance
+//    1. Basic Jet distribution comparison
+//    2. MET and MET resolution 
+//    3. Jet response simply using TProfile
+//    4. Jet resolution with Jet (30<Pt<50) for different eta range (0-2.5),
+//    (2.5-4), (4-5);
 // 
 //        Version:  1.0
 //        Created:  02/11/2014 01:44:39 PM
 //       Compiler:  g++ -std=c++11
 // 
-//         Author:  Zhenbin Wu (benwu)
-//          Email:  benwu@fnal.gov
-//        Company:  Baylor University, CDF@FNAL, CMS@LPC
+//         Author:  Zhenbin Wu, John Stupak
+//        Company:  HATS@LPC
 // 
 // ===========================================================================
 
@@ -25,7 +29,6 @@
 #include "TH1.h"
 #include "TCanvas.h"
 #include "TClonesArray.h"
-#include "TRint.h"
 #include "TProfile.h"
 
 // Classes from Delphes
@@ -53,59 +56,74 @@ int main ( int argc, char *argv[] )
   }
 
   // Getting the input filename
-  const std::string inputFile  = argv[1];
-  const std::string outputFile_name  = argv[2];
-
+  const std::string inputFile_name  = argv[1];
+  const std::string outputFile_name = argv[2];
 
   // Create chain of root trees
   TChain chain("Delphes");
-  chain.Add(inputFile.c_str());
+  chain.Add(inputFile_name.c_str());
 
   // Create the output file
   TFile outputfile(outputFile_name.c_str(), "RECREATE");
 
-  // Keep the root window open
-  //TRint *app = new TRint("DelHATS", &argc, argv);
-  
   // Create object of class ExRootTreeReader
   ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
   Long64_t numberOfEntries = treeReader->GetEntries();
   
   // Get pointers to branches used in this analysis
-  TClonesArray *branchEvent      = treeReader->UseBranch("Event");
   TClonesArray *branchJet        = treeReader->UseBranch("Jet");
   TClonesArray *branchGenJet     = treeReader->UseBranch("GenJet");
-  TClonesArray *branchCAJet      = treeReader->UseBranch("CAJet");
   TClonesArray *branchElectron   = treeReader->UseBranch("Electron");
   TClonesArray *branchMuon       = treeReader->UseBranch("Muon");
   TClonesArray *branchPhoton     = treeReader->UseBranch("Photon");
   TClonesArray *branchMet        = treeReader->UseBranch("MissingET");
-  TClonesArray *branchHt         = treeReader->UseBranch("ScalarHT");
   TClonesArray *branchParticle   = treeReader->UseBranch("Particle");
   
   // Book histograms
+//----------------------------------------------------------------------------
+//  Example 
+//---------------------------------------------------------------------------
+  //TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 500, 0.0, 1000);
+
+//----------------------------------------------------------------------------
+//  Lepton Efficiency exercise
+//----------------------------------------------------------------------------
+  //TH1 *histGenLepEta      = new TH1F("histGenLepEta ", "GenLepton Eta", 120, -6, 6);
+  //TH1 *histMatchGenLepEta = new TH1F("histMatchGenLepEta", "Matched GenLepton Eta", 120, -6, 6);
+  //TH1 *histLepEffEta      = new TH1F("histLepEffEta", "Lepton Efficiency", 120, -6, 6);
+
+
+//----------------------------------------------------------------------------
+//  JEtMET execise
+//----------------------------------------------------------------------------
   TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 500, 0.0, 1000);
   TH1 *histJetEta = new TH1F("jet_eta", "jet Eta", 120, -6, 6);
 
+  //  MET and MET resolution
   TH1 *histMET = new TH1F("MET", "MET", 100, 0.0, 1000);
-  TH1 *histMET_X = new TH1F("MET_X", "MET_X", 100, -100.0, 100.0);
-  TH1 *histMET_Y = new TH1F("MET_Y", "MET_Y", 100, -100.0, 100.0);
+  TH1 *histMET_X = new TH1F("MET_X", "MET_X", 300, -300.0, 300.0);
+  TH1 *histMET_Y = new TH1F("MET_Y", "MET_Y", 300, -300.0, 300.0);
 
+  // MHT and MHT resolution
   TH1 *histMHT = new TH1F("MHT", "MHT", 100, 0.0, 1000);
-  TH1 *histMHT_X = new TH1F("MHT_X", "MHT_X", 100, -100.0, 100.0);
-  TH1 *histMHT_Y = new TH1F("MHT_Y", "MHT_Y", 100, -100.0, 100.0);
+  TH1 *histMHT_X = new TH1F("MHT_X", "MHT_X", 300, -300.0, 300.0);
+  TH1 *histMHT_Y = new TH1F("MHT_Y", "MHT_Y", 300, -300.0, 300.0);
 
-  // Book histograms for MET
-  TH1 *histGenJetPT = new TH1F("genjet_pt", "jet P_{T}", 100, 0.0, 100.0);
-  TH1 *histMatchedGenJetPT = new TH1F("matchjet_pt", "jet P_{T}", 100, 0.0, 100.0);
-  // Book histograms for MHT
-  
-  TProfile *histJetResPT = new TProfile("JetResPT", "GenJet PT", 100, 0,500);
-  TProfile *histJetResEta = new TProfile("JetResEta", "GenJet Eta", 100, -5, 5);
+  // Jet response: approximate by TProfile
+  TProfile *histJetResPT = new TProfile("histJetResPT ", 
+      "Jet response as a fucntion of GenJet Pt", 100, 0, 500);
+  TProfile *histJetResEta = new TProfile("histJetResEta ", 
+      "Jet response as a function of GenJet Eta", 100, -5, 5);
+
+  // Jet resolution for Eta (0, 2.5, 4, 5) and Pt (30, 50);
+  //TH1 *histJetEta1 = new TH1F("histJetEta1 ", "Jet Resolution with eta (0, 2.5)", 200, -4, 4);
+  //TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4)", 200, -4, 4);
+  //TH1 *histJetEta3 = new TH1F("histJetEta3 ", "Jet Resolution with eta (4, 5)", 200, -4, 4);
+
   std::map<std::string, TH1*> JetPTScale;
-  double eta[5] ={ -5, -2.5, 0, 2.5, 5 };
+  double eta[4] ={0, 2.5, 4, 5 };
   double Pt[11] ={30, 50, 70, 100, 150, 200, 300, 500, 700, 900, 1200};
-  for (int i = 1; i < 5; ++i)
+  for (int i = 1; i < 4; ++i)
   {
     for (int j = 1; j < 11; ++j)
     {
@@ -113,10 +131,25 @@ int main ( int argc, char *argv[] )
       ss <<"JetPTScale" << i <<"-"<<j;
       std::string name = ss.str();
       ss << ";Reco Jet / Gen Jet " << "( " << eta[i-1] << 
-        " < #eta < " << eta[i] << ", " << Pt[j-1] <<" < P_{T} < " << Pt[j] <<" )" << ";Events" ;
-      JetPTScale[name] = new TH1F(name.c_str(), ss.str().c_str(), 200, -1, 3);
+        " < |#eta| < " << eta[i] << ", " << Pt[j-1] <<" < P_{T} < " << Pt[j] <<" )" << ";Events" ;
+      JetPTScale[name] = new TH1F(name.c_str(), ss.str().c_str(), 200, -4, 4);
     }
   }
+
+//----------------------------------------------------------------------------
+//  Bonus for jets:
+//----------------------------------------------------------------------------
+  // Jet Efficiency 
+  TH1 *histGenJetEta      = new TH1F("histGenJetEta ", "GenJetton Eta", 120, -6, 6);
+  TH1 *histMatchGenJetEta = new TH1F("histMatchGenJetEta", "Matched GenJetton Eta", 120, -6, 6);
+  TH1 *histJetEffEta      = new TH1F("histJetEffEta", "Jetton Efficiency", 120, -6, 6);
+  
+  // Jet Energy Correction
+  TProfile *histJECPT = new TProfile("histJECPT ", 
+      "Jet Energy Correction as a fucntion of RecoJet Pt", 100, 0, 500);
+  TProfile *histJECEta = new TProfile("histJETEta ", 
+      "Jet Energy Correction as a function of RecoJet Eta", 100, -5, 5);
+  
 //----------------------------------------------------------------------------
 //   Loop over all events
 //----------------------------------------------------------------------------
@@ -139,19 +172,27 @@ int main ( int argc, char *argv[] )
     }
 
 
+    if (entry % 500 == 0)
+      std::cout << "--------------------" << entry << std::endl;
 //----------------------------------------------------------------------------
-//  Calculate MET and MHT
+//  For MET and MHT
 //----------------------------------------------------------------------------
-    TVector2 MHT = CalcMHT(branchJet, branchElectron, branchMuon, branchPhoton);
-    histMHT->Fill(MHT.Mod());
-    histMHT_X->Fill(MHT.Px());
-    histMHT_Y->Fill(MHT.Py());
-    MissingET *MET = (MissingET*)branchMet->At(0);
-    histMET->Fill(MET->MET);
-    histMET_X->Fill(MET->P4().Px());
-    histMET_Y->Fill(MET->P4().Py());
+    if (IsHadronic(branchParticle)) // Only plot MET for Hadronic TTbar decay
+    {
+      MissingET *MET = (MissingET*)branchMet->At(0);
+      histMET->Fill(MET->MET);
+      histMET_X->Fill(MET->P4().Px());
+      histMET_Y->Fill(MET->P4().Py());
 
+      TVector2 MHT = CalcMHT(branchJet, branchElectron, branchMuon, branchPhoton);
+      histMHT->Fill(MHT.Mod());
+      histMHT_X->Fill(MHT.Px());
+      histMHT_Y->Fill(MHT.Py());
+    }
 
+//----------------------------------------------------------------------------
+//  Jet distribution
+//----------------------------------------------------------------------------
     for (int i = 0; i < branchJet->GetEntries(); ++i)
     {
       Jet *jet = (Jet*)branchJet->At(i);
@@ -169,17 +210,33 @@ int main ( int argc, char *argv[] )
     for (int i = 0; i < branchGenJet->GetEntries(); ++i)
     {
       if (MatchIdx.find(i) == MatchIdx.end() ) continue;
-      if (MatchIdx[i] == -1) continue;
-
       Jet* gjet = (Jet*)branchGenJet->At(i);
+      // Bonus: Jet Efficiency
+      histGenJetEta->Fill(gjet->Eta);
+
+      if (MatchIdx[i] == -1) continue;
+      // Bonus: Jet Efficiency
+      histMatchGenJetEta->Fill(gjet->Eta);
+
       Jet *jet = (Jet*) branchJet->At(MatchIdx[i]);
 
       histJetResPT->Fill(gjet->PT, jet->PT/gjet->PT);
       histJetResEta->Fill(gjet->Eta, jet->PT/gjet->PT);
 
-      for (int j = 1; j < 5; ++j)
+      // Bonus: Jet Energy Correction
+      // :WARNING:02/16/2014 07:31:47 PM:benwu: Delphes has certain Jet PT
+      // threshold in the generation step. This would cause the matching bias
+      // Here we select high Pt jets for the jet energy correction
+      // More accurate way should obtain from the PT and Eta range plots
+      if (jet->PT > 30)
       {
-        if (gjet->Eta < eta[j-1] || gjet->Eta > eta[j]) continue;
+        histJECPT->Fill(jet->PT, gjet->PT/jet->PT);
+        histJECEta->Fill(jet->Eta, gjet->PT/jet->PT);
+      }
+
+      for (int j = 1; j < 4; ++j)
+      {
+        if (fabs(gjet->Eta) < eta[j-1] || fabs(gjet->Eta) > eta[j]) continue;
         for (int k = 1; k < 11; ++k)
         {
           if (gjet->PT > Pt[k-1] && gjet->PT < Pt[k])
@@ -194,13 +251,15 @@ int main ( int argc, char *argv[] )
 
   } // End of looping event
 
+  histJetEffEta = (TH1*)histMatchGenJetEta->Clone("histJetEffEta");
+  histJetEffEta->SetTitle("Jetton Efficiency");
+  histJetEffEta->Divide(histGenJetEta);
 
-  // Show resulting histograms
-  //histJetPT->Draw();
-
+  // Saving resulting histograms
   histJetPT->Write();
-  histJetResPT->Write();
-  histJetResEta->Write();
+  //histGenLepEta->Write();
+  //histMatchGenLepEta->Write();
+  //histLepEffEta->Write();
   histJetEta->Write();
   histMET->Write();
   histMET_X->Write();
@@ -208,17 +267,26 @@ int main ( int argc, char *argv[] )
   histMHT->Write();
   histMHT_X->Write();
   histMHT_Y->Write();
+  histJetResPT->Write();
+  histJetResEta->Write();
+  //histJetEta1->Write();
+  //histJetEta2->Write();
+  //histJetEta3->Write();
 
   for(std::map<std::string, TH1*>::iterator it=JetPTScale.begin();
     it!=JetPTScale.end(); it++)
   {
     it->second->Write();
-    //delete it->second;
   }
 
-  outputfile.Close();
-  //app->Run();
+  //Writing out bonus plots
+  histGenJetEta->Write();
+  histMatchGenJetEta->Write();
+  histJetEffEta->Write();
+  histJECPT->Write();
+  histJECEta->Write();
 
+  outputfile.Close();
   return EXIT_SUCCESS;
 }				// ----------  end of function main  ----------
 
@@ -226,7 +294,7 @@ int main ( int argc, char *argv[] )
 
 // ===  FUNCTION  ============================================================
 //         Name:  IsHadronic
-//  Description:  
+//  Description:  Add to more box
 // ===========================================================================
 bool IsHadronic(TClonesArray *branchParticle)
 {
@@ -235,12 +303,17 @@ bool IsHadronic(TClonesArray *branchParticle)
   for (int i = 0; i < GenSize; ++i)
   {
     GenParticle *p = (GenParticle*) branchParticle->At(i);
-    if (p->Status != 3 || p->M1 > GenSize || p->M2 > GenSize )  continue;
+    if (p->Status != 3 ) // Skipping stable lepton, which might come from showing
+      continue;
+    if ( (p->M1 != -1 && fabs(((GenParticle*)branchParticle->At(p->M1))->PID) != 24) && 
+        (p->M2 != -1 && fabs(((GenParticle*)branchParticle->At(p->M2))->PID) != 24 ))
+        continue;  //Making sure the lepton from W decay 
     if (std::abs(p->PID) == 11 || std::abs(p->PID) == 13 || std::abs(p->PID) == 15) 
     {
       lepcount++;
     }
   }
+
   return lepcount == 0;
 }       // -----  end of function IsHadronic  -----
 
@@ -302,6 +375,7 @@ std::map<int, int> MatchingJet(TClonesArray *branchGenJet, TClonesArray *branchJ
       }
     }
   }
+
   return MatchIdx;
 }       // -----  end of function MatchingLepton  -----
 
