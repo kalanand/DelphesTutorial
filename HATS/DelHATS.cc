@@ -107,9 +107,9 @@ int main ( int argc, char *argv[] )
       //"Jet response as a function of GenJet Eta", 100, -5, 5);
 
   //// Jet resolution for Eta (0, 2.5, 4, 5) and Pt (30, 50);
-  //TH1 *histJetEta1 = new TH1F("histJetEta1 ", "Jet Resolution with eta (0, 2.5)", 200, 4, 4);
-  //TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4)", 200, 4, 4);
-  //TH1 *histJetEta3 = new TH1F("histJetEta3 ", "Jet Resolution with eta (4, 5)", 200, 4, 4);
+  //TH1 *histJetEta1 = new TH1F("histJetEta1 ", "Jet Resolution with eta (0, 2.5)", 200, -4, 4);
+  //TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4)", 200, -4, 4);
+  //TH1 *histJetEta3 = new TH1F("histJetEta3 ", "Jet Resolution with eta (4, 5)", 200, -4, 4);
 
 //----------------------------------------------------------------------------
 //   Loop over all events
