@@ -51,7 +51,6 @@ for key in keys:
             else: h.SetMaximum(1.5*max)
             h.Draw()
         else: h.Draw("SAME")
-        print h.GetMean()
 
     l.Draw("SAME")
     c.SaveAs("plots/"+key.GetName()+".pdf")
