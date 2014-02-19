@@ -151,6 +151,7 @@ void MHT::Process()
 
   //Set 4-momentum of output candidate
   candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  momentum.SetPhi(3.14159+momentum.Phi());
   candidate->Momentum = momentum;
 
   //Output must be in the form of an array - Here the array will always contain exactly 1 element
