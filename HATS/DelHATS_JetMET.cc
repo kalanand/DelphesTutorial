@@ -6,8 +6,7 @@
 //    1. Basic Jet distribution comparison
 //    2. MET and MET resolution 
 //    3. Jet response simply using TProfile
-//    4. Jet resolution with Jet (30<Pt<50) for different eta range (0-2.5),
-//    (2.5-4), (4-5);
+//    4. Jet resolution with Jet (Pt>30) for different eta range (0-2.5),(2.5-4)
 // 
 //        Version:  1.0
 //        Created:  02/11/2014 01:44:39 PM
@@ -83,7 +82,7 @@ int main ( int argc, char *argv[] )
 //----------------------------------------------------------------------------
 //  Example 
 //---------------------------------------------------------------------------
-  //TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 500, 0.0, 1000);
+  TH1 *histJet1PT = new TH1F("jet1_pt", "jet1 P_{T}", 500, 0.0, 1000);
 
 //----------------------------------------------------------------------------
 //  Lepton Efficiency exercise
@@ -96,29 +95,29 @@ int main ( int argc, char *argv[] )
 //----------------------------------------------------------------------------
 //  JEtMET execise
 //----------------------------------------------------------------------------
-  TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 500, 0.0, 1000);
-  TH1 *histJetEta = new TH1F("jet_eta", "jet Eta", 120, -6, 6);
+  TH1 *histNJets = new TH1F("NJets", "NJets;NO. of Jets(P_{T} > 30GeV);Events", 20, 0.0, 20);
+  TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T};jet P_{T};NO. of Jets", 400, 0.0, 400);
+  TH1 *histJetEta = new TH1F("jet_eta", "jet Eta;jet #eta;NO. of Jets", 120, -6, 6);
 
   //  MET and MET resolution
-  TH1 *histMET = new TH1F("MET", "MET", 100, 0.0, 1000);
-  TH1 *histMET_X = new TH1F("MET_X", "MET_X", 300, -300.0, 300.0);
-  TH1 *histMET_Y = new TH1F("MET_Y", "MET_Y", 300, -300.0, 300.0);
+  TH1 *histMET = new TH1F("MET", "MET;#slash{E}_{T};Events", 100, 0.0, 300);
+  TH1 *histMET_X = new TH1F("MET_X", "MET_X;#slash{E}_{T} P_{x};Events", 200, -200.0, 200.0);
+  TH1 *histMET_Y = new TH1F("MET_Y", "MET_Y;#slash{E}_{T} P_{Y};Events", 200, -200.0, 200.0);
 
   // MHT and MHT resolution
-  TH1 *histMHT = new TH1F("MHT", "MHT", 100, 0.0, 1000);
-  TH1 *histMHT_X = new TH1F("MHT_X", "MHT_X", 300, -300.0, 300.0);
-  TH1 *histMHT_Y = new TH1F("MHT_Y", "MHT_Y", 300, -300.0, 300.0);
+  TH1 *histMHT = new TH1F("MHT", "MHT;#slash{H}_{T};Events", 100, 0.0, 300);
+  TH1 *histMHT_X = new TH1F("MHT_X", "MHT_X;#slash{H}_{T};Events", 200, -200.0, 200.0);
+  TH1 *histMHT_Y = new TH1F("MHT_Y", "MHT_Y;#slash{H}_{T};Events", 200, -200.0, 200.0);
 
   // Jet response: approximate by TProfile
   TProfile *histJetResPT = new TProfile("histJetResPT ", 
-      "Jet response as a fucntion of GenJet Pt", 100, 0, 500);
+      "Jet response as a fucntion of GenJet Pt;GenJet P_{T};<RecoJet/GenJet P_{T}>", 100, 0, 500);
   TProfile *histJetResEta = new TProfile("histJetResEta ", 
-      "Jet response as a function of GenJet Eta", 100, -5, 5);
+      "Jet response as a function of GenJet Eta;GenJet #eta;<RecoJet/GenJet P_{T}>", 100, -5, 5);
 
-  // Jet resolution for Eta (0, 2.5, 4, 5) and Pt (30, 50);
-  //TH1 *histJetEta1 = new TH1F("histJetEta1 ", "Jet Resolution with eta (0, 2.5)", 200, -4, 4);
-  //TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4)", 200, -4, 4);
-  //TH1 *histJetEta3 = new TH1F("histJetEta3 ", "Jet Resolution with eta (4, 5)", 200, -4, 4);
+  // Jet resolution for GenJet Eta (0, 2.5),(2.5, 4) and Pt > 50;
+  TH1 *histJetEta1 = new TH1F("histJetEta1 ", "Jet Resolution with eta (0, 2.5);RecoJet/GenJet (GenJet 0 < |#eta| < 2.5, P_{T} > 50);Jets", 200, 0, 3);
+  TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4);RecoJet/GenJet (GenJet 2.5 < |#eta| < 4, P_{T} > 50);Jets", 200, 0, 3);
 
   std::map<std::string, TH1*> JetPTScale;
   double eta[4] ={0, 2.5, 4, 5 };
@@ -130,9 +129,9 @@ int main ( int argc, char *argv[] )
       std::stringstream ss;
       ss <<"JetPTScale" << i <<"-"<<j;
       std::string name = ss.str();
-      ss << ";Reco Jet / Gen Jet " << "( " << eta[i-1] << 
-        " < |#eta| < " << eta[i] << ", " << Pt[j-1] <<" < P_{T} < " << Pt[j] <<" )" << ";Events" ;
-      JetPTScale[name] = new TH1F(name.c_str(), ss.str().c_str(), 200, -4, 4);
+      ss << ";Reco Jet / Gen Jet " << "(GenJet " << eta[i-1] << 
+        " < |#eta| < " << eta[i] << ", P_{T} > " << Pt[j-1] << " )" << ";Jets" ;
+      JetPTScale[name] = new TH1F(name.c_str(), ss.str().c_str(), 200, 0, 3);
     }
   }
 
@@ -140,15 +139,15 @@ int main ( int argc, char *argv[] )
 //  Bonus for jets:
 //----------------------------------------------------------------------------
   // Jet Efficiency 
-  TH1 *histGenJetEta      = new TH1F("histGenJetEta ", "GenJetton Eta", 120, -6, 6);
-  TH1 *histMatchGenJetEta = new TH1F("histMatchGenJetEta", "Matched GenJetton Eta", 120, -6, 6);
-  TH1 *histJetEffEta      = new TH1F("histJetEffEta", "Jetton Efficiency", 120, -6, 6);
+  TH1 *histGenJetEta      = new TH1F("histGenJetEta ", "GenJet Eta;GenJet #eta;NO. of GenJet", 120, -6, 6);
+  TH1 *histMatchGenJetEta = new TH1F("histMatchGenJetEta", "Matched GenJet Eta;GenJet #eta;NO. of GenJet with RecoJet matched", 120, -6, 6);
+  TH1 *histJetEffEta      = new TH1F("histJetEffEta", "Jet Efficiency;GenJet #eta;Jet Efficiency", 120, -6, 6);
   
   // Jet Energy Correction
   TProfile *histJECPT = new TProfile("histJECPT ", 
-      "Jet Energy Correction as a fucntion of RecoJet Pt", 100, 0, 500);
-  TProfile *histJECEta = new TProfile("histJETEta ", 
-      "Jet Energy Correction as a function of RecoJet Eta", 100, -5, 5);
+      "Jet Energy Correction as a fucntion of RecoJet Pt;RecoJet P_{T};<GenJet/RecoJet P_{T}>", 100, 0, 500);
+  TProfile *histJECEta = new TProfile("histJECEta ", 
+      "Jet Energy Correction as a function of RecoJet Eta;RecoJet #eta;<GenJet/RecoJet P_{T}>", 100, -5, 5);
   
 //----------------------------------------------------------------------------
 //   Loop over all events
@@ -158,6 +157,9 @@ int main ( int argc, char *argv[] )
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
   
+    if (entry % 500 == 0)
+      std::cout << "--------------------" << entry << std::endl;
+
     // If event contains at least 1 jet
     if(branchJet->GetEntries() > 0)
     {
@@ -165,15 +167,12 @@ int main ( int argc, char *argv[] )
       Jet *jet = (Jet*) branchJet->At(0);
       
       // Plot jet transverse momentum
-      histJetPT->Fill(jet->PT);
+      histJet1PT->Fill(jet->PT);
       
       // Print jet transverse momentum
       //std::cout << jet->PT << std::endl;
     }
 
-
-    if (entry % 500 == 0)
-      std::cout << "--------------------" << entry << std::endl;
 //----------------------------------------------------------------------------
 //  For MET and MHT
 //----------------------------------------------------------------------------
@@ -193,15 +192,18 @@ int main ( int argc, char *argv[] )
 //----------------------------------------------------------------------------
 //  Jet distribution
 //----------------------------------------------------------------------------
+    int jetcount=0;
     for (int i = 0; i < branchJet->GetEntries(); ++i)
     {
       Jet *jet = (Jet*)branchJet->At(i);
-      if (jet->PT > 30 && fabs(jet->Eta) < 5)
+      if (jet->PT > 30)
       {
         histJetPT->Fill(jet->PT);
         histJetEta->Fill(jet->Eta);
+        jetcount++;
       }
     }
+    histNJets->Fill(jetcount);
 
 //----------------------------------------------------------------------------
 //  Find the matching index
@@ -239,7 +241,7 @@ int main ( int argc, char *argv[] )
         if (fabs(gjet->Eta) < eta[j-1] || fabs(gjet->Eta) > eta[j]) continue;
         for (int k = 1; k < 11; ++k)
         {
-          if (gjet->PT > Pt[k-1] && gjet->PT < Pt[k])
+          if (gjet->PT > Pt[k-1])
           {
             std::stringstream ss;
             ss <<"JetPTScale" << j <<"-"<<k;
@@ -252,14 +254,18 @@ int main ( int argc, char *argv[] )
   } // End of looping event
 
   histJetEffEta = (TH1*)histMatchGenJetEta->Clone("histJetEffEta");
-  histJetEffEta->SetTitle("Jetton Efficiency");
+  histJetEffEta->SetTitle("Jet Efficiency;GenJet #eta;Jet Efficiency");
   histJetEffEta->Divide(histGenJetEta);
 
   // Saving resulting histograms
-  histJetPT->Write();
+  histJet1PT->Write();
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lepton Efficiency ~~~~~
   //histGenLepEta->Write();
   //histMatchGenLepEta->Write();
   //histLepEffEta->Write();
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JetMet Exercise ~~~~~
+  histNJets->Write();
+  histJetPT->Write();
   histJetEta->Write();
   histMET->Write();
   histMET_X->Write();
@@ -271,15 +277,13 @@ int main ( int argc, char *argv[] )
   histJetResEta->Write();
   //histJetEta1->Write();
   //histJetEta2->Write();
-  //histJetEta3->Write();
-
   for(std::map<std::string, TH1*>::iterator it=JetPTScale.begin();
     it!=JetPTScale.end(); it++)
   {
     it->second->Write();
   }
 
-  //Writing out bonus plots
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JetMET Bonus ~~~~~
   histGenJetEta->Write();
   histMatchGenJetEta->Write();
   histJetEffEta->Write();

@@ -23,11 +23,14 @@ keys=files[0].GetListOfKeys()
 
 c=TCanvas()
 for key in keys:
-    if type(files[0].Get(key.GetName()))!=type(TH1F()): continue
+    if type(files[0].Get(key.GetName()))!=type(TH1F()) and \
+       type(files[0].Get(key.GetName()))!=type(TProfile()) : continue
 
     l=TLegend(.49,.69,.89,.89)
+    l.SetFillStyle(0)
     hists=[]
     max=0
+
     for lp in range(len(files)):
         file=files[lp]
         fileName=fileNames[lp]
@@ -41,17 +44,23 @@ for key in keys:
         if h.GetMaximum()>max: max=h.GetMaximum()
 
         h.SetLineColor(1+lp)
+        h.SetLineWidth(3)
         l.AddEntry(h,fileNames[lp].split('.')[0],"l")
 
     for lp in range(len(hists)):
         h=hists[lp]
         
         if lp==0:
-            if LOG: h.SetMaximum(100*max)
-            else: h.SetMaximum(1.5*max)
+            if LOG or key.GetName() == "jet_eta":
+              c.SetLogy(True)
+              h.SetMaximum(100*max)
+            else: 
+              c.SetLogy(False)
+              h.SetMaximum(1.5*max)
             h.Draw()
         else: h.Draw("SAME")
 
     l.Draw("SAME")
     c.SaveAs("plots/"+key.GetName()+".pdf")
+    c.SaveAs("plots/"+key.GetName()+".png")
             
