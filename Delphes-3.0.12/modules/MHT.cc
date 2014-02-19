@@ -161,6 +161,7 @@ void MHT::Process()
   candidate = factory->NewCandidate();
 
   candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  momentum.SetPhi(3.14159+momentum.Phi());
   candidate->Momentum = momentum;
 
   fMomentumOutputArray->Add(candidate);
