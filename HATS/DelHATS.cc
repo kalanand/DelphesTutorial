@@ -75,6 +75,13 @@ int main ( int argc, char *argv[] )
 //---------------------------------------------------------------------------
   TH1 *histJet1PT = new TH1F("jet1_pt", "jet1 P_{T}", 500, 0.0, 1000);
 
+  TH1 *histJet1PTAll = new TH1F("jet_ptAll", "all jet P_{T}", 500, 0.0, 1000);
+
+  TH1 *histJet1EtaAll = new TH1F("jet_etaAll", "all jet eta", 500, -5, 5);
+
+  TH1 *histNJet = new TH1F("njet", "jet multiplicity", 51, -1, 50);
+
+
 //----------------------------------------------------------------------------
 //  Lepton Efficiency exercise
 //----------------------------------------------------------------------------
@@ -132,22 +139,38 @@ int main ( int argc, char *argv[] )
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
   
+
+    int numJet=0;
     // If event contains at least 1 jet
     if(branchJet->GetEntries() > 0)
     {
       // Take first jet
-      Jet *jet = (Jet*) branchJet->At(0);
+      Jet *jet = (Jet*) branchJet->At(0); 
       
       // Plot jet transverse momentum
       histJet1PT->Fill(jet->PT);
       
       // Print jet transverse momentum
       std::cout << jet->PT << std::endl;
+
+
+      for (int i=0; i< branchJet->GetEntries(); ++i) {
+	jet = (Jet*) branchJet->At(i);
+	if(jet->PT > 30.) { 
+	  histJet1PTAll->Fill(jet->PT);
+	  histJet1EtaAll->Fill(jet->Eta);
+	  numJet++;
+	}
+      }
     }
+    histNJet->Fill(numJet);
   }
 
   // Saving resulting histograms
   histJet1PT->Write();
+  histNJet->Write();
+  histJet1PTAll->Write();
+  histJet1EtaAll->Write();
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lepton Efficiency ~~~~~
   //histGenLepEta->Write();
   //histMatchGenLepEta->Write();
